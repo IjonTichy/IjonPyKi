@@ -11,7 +11,7 @@ def getPage(args):
     inner = title = ""
 
     try:
-        page  = wikipage.WikiPage(args["page"])
+        page  = wikipage.WikiPage(args["page"], tryUnnicify=True)
         inner = page.getHTML(args["rev"], args["source"])
         title = page.niceName
 

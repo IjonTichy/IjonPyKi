@@ -34,19 +34,25 @@ addInner = string.Template(addInner)
 
 
 class WikiPage(object):
-    def __init__(self, pagename, postdir="pages/"):
+    def __init__(self, pagename, postdir="pages/", *, tryUnnicify=False):
 
         postdir = os.path.abspath(postdir)
 
-        if not os.path.isdir(postdir): raise IOError("{0} is not a directory".format(postdir))
-        if not self.validTitle(pagename): raise ValueError("\"{0}\" is an invalid name for a Wiki page".format(pagename))
+        self.formatter  = wikiformat.WikiFormatter()
+        self.revisions  = {}
 
-        self.title      = pagename
-        self.pageName   = pagename.lower()
+        if not os.path.isdir(postdir): raise IOError("{0} is not a directory".format(postdir))
+
+        if not self.validTitle(pagename) and tryUnnicify:
+            pagename = self.formatter.unnicify(pagename)
+
+        if not self.validTitle(pagename):
+            raise ValueError("\"{0}\" is an invalid name for a Wiki page".format(pagename))
+
+        self.title      = pagename[0].upper() + pagename[1:]
+        self.pageName   = self.title.lower()
         self.postDir    = postdir + os.sep + self.pageName
         self.metaFile   = self.postDir + os.sep + "metadata.txt"
-        self.revisions  = {}
-        self.formatter  = wikiformat.WikiFormatter()
 
         if not os.path.isdir(self.postDir):
             if os.path.exists(self.postDir):

@@ -136,6 +136,25 @@ class WikiFormatter(object):
         
         return ret.strip()
 
+    @staticmethod
+    def unnicify(title):
+        ret = []
+
+        upperNext = True
+
+        for char in title:
+            if char in " \t":
+                upperNext = True
+                continue
+
+            if upperNext:
+                ret.append(char.upper())
+                continue
+
+            ret.append(char)
+
+        return "".join(ret)
+
     def formatContents(self, contents, escaped=False):
         if not escaped:
             escapedLines = cgi.escape(contents)
