@@ -1,0 +1,20 @@
+<div class="wikiAdd">
+  <div class="revisions">
+  <h3>Revisions</h3>
+  ${revisions}<p />
+  <a href="${sourceLink}">${sourceName}</a>
+  </div>
+
+  <div class="wikiContents">
+    <h1>Edit ${title}</h1>
+  
+  <form action="index.py" method="post" class="wikiAdd">
+    <input type="hidden" name="mode" value="add" />
+    <input type="hidden" name="page" value="${page}" />
+    <input type="hidden" name="rev" value="${revision}" />
+    <textarea name="text" class="source">${content}</textarea>
+    <input type="submit" value="Submit" />
+  </form>
+  </div>
+</div>
+<div class="nofloat"></div>

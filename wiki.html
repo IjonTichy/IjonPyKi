@@ -1,0 +1,27 @@
+<html>
+  <head>
+    <title>Ijon Tichy's Lair :: Wiki (${title})</title>
+    <link rel="stylesheet" href="wiki.css">
+  </head>
+  <body>
+<!--#include virtual="/header.html" -->
+<div class="searchInput">
+  <form action="index.py" method="get" class="wikiInput">
+    Search:
+      <input type="hidden" name="mode" value="search">
+      <input type="text" name="q">
+      <input type="submit" value="Search">
+  </form>
+  <form action="index.py" method="get" class="wikiInput">
+    Go to page (raw name):
+      <input type="text" size="10" name="page">
+      <input type="submit" value="Go">
+  </form>
+</div>
+
+<p />
+
+${inner}
+<!--#include virtual="/footer.html" -->
+  </body>
+</html>
