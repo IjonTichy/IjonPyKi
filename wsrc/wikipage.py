@@ -71,6 +71,12 @@ class WikiPage(object):
             if char not in VALID: return False
 
         return True
+
+    def nicify(self, name):
+        return self.formatter.nicify(name)
+
+    def unnicify(self, name):
+        return self.formatter.unnicify(name)
     
     @property
     def niceName(self):
@@ -192,6 +198,18 @@ class WikiPage(object):
         else:
             raise TypeError("revision \"{0}\" does not have page data".format(revision))
 
+    def getPage(self, revision=-1):
+        page = self.get(revision)
+
+        if not page: return ""
+
+        return page["page"]
+    
+    def getLinks(self, revision=-1):
+        page = self.getPage(revision)
+        parsed, links = self.formatter.formatContents(page, withLinks=True)
+
+        return links
 
     def getHTML(self, revision=-1, source=False, *, onlyContents=False):
         formatDict = {}
@@ -211,7 +229,7 @@ class WikiPage(object):
 
             if revision not in self.revisions: revision = self.revisionList[0]
 
-            contents    = self.get(revision)["page"]
+            contents    = self.getPage(revision)
             revisions   = self.revisionListHTML(revision, source)
 
             if source:

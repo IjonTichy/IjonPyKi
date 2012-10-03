@@ -30,7 +30,8 @@ def addPage(args):
         page   = wikipage.WikiPage(args["page"])
         revNum = page.addRevision(newRev)
         search = wikisearch.WikiSearcher()
-        search.syncPage(args["page"])
+        search.syncPageObject(page, revNum, add=True)
+        search.sync()
 
     except KeyError as e:
         inner = "Tried to get key \"{0}\", failed.".format(e.args[0])

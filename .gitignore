@@ -26,4 +26,8 @@ pip-log.txt
 #Mr Developer
 .mr.developer.cfg
 
-*.sw[op]
+# Wiki-specific stuff
+*.sw[nop]
+wikiSearchDB.db
+deepSearchDB.db
+pages/*

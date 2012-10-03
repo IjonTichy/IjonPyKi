@@ -90,8 +90,8 @@ class WikiFormatter(object):
     }
     
     def __init__(self):
-        self.subformatters = (self.bracketFormat, self.braceFormat, self.linkFormat)
-        self.braceClasses  = self.__class__.BraceClasses
+        self.subformatters  = (self.bracketFormat, self.braceFormat, self.linkFormat)
+        self.braceClasses   = self.__class__.BraceClasses
     
     @staticmethod
     def nicify(title):
@@ -147,6 +147,9 @@ class WikiFormatter(object):
                 upperNext = True
                 continue
 
+            if char not in VALID:
+                continue
+
             if upperNext:
                 ret.append(char.upper())
                 continue
@@ -155,7 +158,9 @@ class WikiFormatter(object):
 
         return "".join(ret)
 
-    def formatContents(self, contents, escaped=False):
+    def formatContents(self, contents, escaped=False, withLinks=False):
+        links = {"internal": set(), "external": set()}
+
         if not escaped:
             escapedLines = cgi.escape(contents)
             escapedLines = escapedLines.replace("&amp;#45;", "-")
@@ -185,8 +190,10 @@ class WikiFormatter(object):
 
                 inCode = False
 
+                subformat = lambda x: self.subformat(x, links)
+
                 line2 = " " + line + " "
-                line2 = SUBFORMATRE.sub(self.subformat, line2)
+                line2 = SUBFORMATRE.sub(subformat, line2)
                 line2 = ITALICRE.sub("<em>\g<1></em>", line2)
                 line2 = BOLDRE.sub("<strong>\g<1></strong>", line2)
                 retadd += line2[1:-1]
@@ -199,19 +206,22 @@ class WikiFormatter(object):
         if inCode:
             ret += "</div>"
 
+        if withLinks:
+            return (ret, links)
+        
         return ret
 
-    def subformat(self, match):
+    def subformat(self, match, links):
         groups = match.groups()
 
         for func, group in zip(self.subformatters, groups):
             if group is not None:
-                return func(group)
+                return func(group, links)
     
     def noFormat(self, group):
         return group
 
-    def bracketFormat(self, group):
+    def bracketFormat(self, group, links):
         explicit1 = EXPLICITRE1.match(group)
         explicit2 = EXPLICITRE2.match(group)
         explicit3 = EXPLICITRE3.match(group)
@@ -219,19 +229,22 @@ class WikiFormatter(object):
         if explicit1:
             groups = explicit1.groups()
             nice   = self.nicify(groups[0])
+            links['internal'] |= {groups[0]}
             return LINK1.format(groups[0], nice)
 
         if explicit2:
             groups = explicit2.groups()
+            links['internal'] |= {groups[0]}
             return LINK1.format(*groups[0:2])
 
         if explicit3:
             groups = explicit3.groups()
+            links['external'] |= {groups[0]}
             return LINK2.format(groups[0], groups[-1])
         
         return " [[" + self.formatContents(group[2:-2], escaped=True).rstrip() + "]] "
 
-    def braceFormat(self, group):
+    def braceFormat(self, group, links):
         noLink = NOLINKRE.match(group[2:-2])
         clsContents = BRACECLASSRE.match(group)
 
@@ -260,9 +273,10 @@ class WikiFormatter(object):
 
         return " {{" + self.formatContents(group[2:-2], escaped=True).rstrip() + "}} "
 
-    def linkFormat(self, group):
+    def linkFormat(self, group, links):
         implicit = LINKRE.match(group)
 
         if implicit:
             link = implicit.group(1)
+            links['internal'] |= {link}
             return LINK1.format(link, self.nicify(link))
